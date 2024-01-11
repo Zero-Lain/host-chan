@@ -46,9 +46,9 @@ fn append_to_hosts_file(content: &str) -> std::io::Result<()> {
         // 删除旧内容
         file_lines.drain(start..=end);
         // 插入内容
-        file_lines.insert(start, "=start=".to_string());
+        file_lines.insert(start, "#---start---#".to_string());
         file_lines.insert(start + 1, insert_content.to_string());
-        file_lines.insert(start + 2, "=end=".to_string());
+        file_lines.insert(start + 2, "#---end---#".to_string());
     } else {
         // 如果没有找到插入位置，则在文件末尾添加内容
         file_lines.push("#---start---#".to_string());
