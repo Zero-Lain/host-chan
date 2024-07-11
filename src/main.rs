@@ -14,6 +14,9 @@ use std::fs::OpenOptions;
 use std::io::{self, BufRead, BufReader, Write};
 use std::path::Path;
 
+const START_PROFIX: &str = "#===HostChanStart===#";
+const END_PROFIX: &str = "#===HostChanEnd===#";
+
 async fn download_hosts_file(url: &str) -> Result<String, reqwest::Error> {
     let response = reqwest::get(url).await?;
     let content = response.text().await?;
@@ -28,7 +31,7 @@ fn get_hosts_path() -> std::io::Result<&'static str> {
     } else {
         Err(std::io::Error::new(
             std::io::ErrorKind::Other,
-            "Unsupported operating system",
+            "》Unsupported operating system.",
         ))
     }
 }
@@ -39,21 +42,23 @@ fn append_to_hosts_file(content: &str) -> std::io::Result<()> {
     let reader = BufReader::new(file);
     let mut file_lines = reader.lines().collect::<io::Result<Vec<String>>>()?;
     // 查找插入位置
-    let start_index = file_lines.iter().position(|line| line.trim() == "=start=");
-    let end_index = file_lines.iter().position(|line| line.trim() == "=end=");
+    let start_index = file_lines
+        .iter()
+        .position(|line| line.trim() == START_PROFIX);
+    let end_index = file_lines.iter().position(|line| line.trim() == END_PROFIX);
     let insert_content = content;
     if let (Some(start), Some(end)) = (start_index, end_index) {
         // 删除旧内容
         file_lines.drain(start..=end);
         // 插入内容
-        file_lines.insert(start, "#---start---#".to_string());
+        file_lines.insert(start, START_PROFIX.to_string());
         file_lines.insert(start + 1, insert_content.to_string());
-        file_lines.insert(start + 2, "#---end---#".to_string());
+        file_lines.insert(start + 2, END_PROFIX.to_string());
     } else {
         // 如果没有找到插入位置，则在文件末尾添加内容
-        file_lines.push("#---start---#".to_string());
+        file_lines.push(START_PROFIX.to_string());
         file_lines.push(insert_content.to_string());
-        file_lines.push("#---end---#".to_string());
+        file_lines.push(END_PROFIX.to_string());
     }
 
     // 写入文件
@@ -70,18 +75,28 @@ fn append_to_hosts_file(content: &str) -> std::io::Result<()> {
 
 #[tokio::main]
 async fn main() {
+    println!("》HostChan《");
     let mut config = Config::new();
     config.merge(File::with_name("config/config.toml")).unwrap();
     let url = config.get_str("host.url").unwrap();
     if url.is_empty() {
-        eprintln!("Please set url in config/config.toml");
+        eprintln!("》Please set url in config/config.toml");
         return;
     }
+    println!("》Fetch hosts file from: {}", url);
     match download_hosts_file(&url).await {
         Ok(content) => match append_to_hosts_file(&content) {
-            Ok(()) => println!("Hosts file updated successfully!"),
-            Err(err) => eprintln!("Failed to append to hosts file: {}", err),
+            Ok(()) => println!("》Hosts file updated successfully!"),
+            Err(err) => {
+                eprintln!("》Failed to append to hosts file: {}", err);
+                println!("》May be try it in Administrator Or Root...");
+            }
         },
-        Err(err) => eprintln!("Failed to download hosts file: {}", err),
+        Err(err) => eprintln!("》Failed to download hosts file: {}", err),
     }
+    println!("》Press any key to exit...");
+    let _ = io::stdout().flush();
+    let mut input = String::new();
+    let _ = io::stdin().read_line(&mut input);
+    println!("》Exiting program...");
 }
