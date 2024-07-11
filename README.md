@@ -12,8 +12,8 @@ Host写入脚本
 ## 构建
 ```shell
 #win
-cargo build --target i686-pc-windows-gnu --release
-cargo build --target x86_64-pc-windows-gnu --release
+cargo build --target i686-pc-windows-msvc --release
+cargo build --target x86_64-pc-windows-msvc --release
 #linux
 cargo build --target i686-unknown-linux-musl --release
 cargo build --target x86_64-unknown-linux-musl --release

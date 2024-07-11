@@ -77,22 +77,23 @@ fn append_to_hosts_file(content: &str) -> std::io::Result<()> {
 async fn main() {
     println!("》HostChan《");
     let mut config = Config::new();
+    // if file not exit ?
     config.merge(File::with_name("config/config.toml")).unwrap();
     let url = config.get_str("host.url").unwrap();
     if url.is_empty() {
         eprintln!("》Please set url in config/config.toml");
-        return;
-    }
-    println!("》Fetch hosts file from: {}", url);
-    match download_hosts_file(&url).await {
-        Ok(content) => match append_to_hosts_file(&content) {
-            Ok(()) => println!("》Hosts file updated successfully!"),
-            Err(err) => {
-                eprintln!("》Failed to append to hosts file: {}", err);
-                println!("》May be try it in Administrator Or Root...");
-            }
-        },
-        Err(err) => eprintln!("》Failed to download hosts file: {}", err),
+    } else {
+        println!("》Fetch hosts file from: {}", url);
+        match download_hosts_file(&url).await {
+            Ok(content) => match append_to_hosts_file(&content) {
+                Ok(()) => println!("》Hosts file updated successfully!"),
+                Err(err) => {
+                    eprintln!("》Failed to append to hosts file: {}", err);
+                    println!("》May be try it in Administrator Or Root...");
+                }
+            },
+            Err(err) => eprintln!("》Failed to download hosts file: {}", err),
+        }
     }
     println!("》Press any key to exit...");
     let _ = io::stdout().flush();
