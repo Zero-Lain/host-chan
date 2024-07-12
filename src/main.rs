@@ -2,7 +2,7 @@
  * @Author: Sanka vaeceby2@qq.com
  * @Date: 2024-01-04 11:28:03
  * @LastEditors: Sanka vaeceby2@qq.com
- * @LastEditTime: 2024-01-04 12:24:53
+ * @LastEditTime: 2024-07-12 9:43:13
  * @FilePath: \hostChan\src\main.rs
  * @Description:
  * Auto fetch hosts file.
